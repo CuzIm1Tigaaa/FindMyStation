@@ -1,9 +1,0 @@
-name: FindMyStation
-version: 1.0
-main: de.cuzim1tigaaa.workingstation.FindMyStation
-author: CuzIm1Tigaaa
-api-version: 1.19
-commands:
-  color:
-    aliases: []
-    description: "Changes the players highlighting color"
