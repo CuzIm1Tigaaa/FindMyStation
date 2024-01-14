@@ -1,0 +1,10 @@
+name: ${project.artifactId}
+version: ${project.version}
+main: ${project.groupId}.${project.artifactId}
+author: ${author}
+api-version: 1.19
+commands:
+  findmystation:
+    aliases: [fms]
+    description: "Plugin command"
+    usage: /findmystation [subcommand]
