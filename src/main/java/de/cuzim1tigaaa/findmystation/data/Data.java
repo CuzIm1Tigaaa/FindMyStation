@@ -24,8 +24,8 @@ public class Data {
 
 		public PlayerData(UUID uuid) {
 			this.uuid = uuid;
-			this.useRGB = Config.getBoolean(Config.CONFIG_RGB_ALLOW);
-			this.hexColor = Config.getString(Config.CONFIG_DEFAULT_COLOR);
+			this.useRGB = Config.getBoolean(Paths.CONFIG_RGB_ALLOW);
+			this.hexColor = Config.getString(Paths.CONFIG_DEFAULT_COLOR);
 		}
 
 		public PlayerData(UUID uuid, boolean useRGB, String hexColor) {
