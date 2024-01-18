@@ -10,7 +10,6 @@ import org.bukkit.entity.memory.MemoryKey;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -47,7 +46,6 @@ public class HighlightListener implements Listener {
 			this.blockDisplay = blockDisplay;
 		}
 	}
-
 
 
 	private final FindMyStation plugin;
@@ -89,12 +87,6 @@ public class HighlightListener implements Listener {
 	}
 
 	@EventHandler
-	public void merchantOpen(InventoryOpenEvent event) {
-
-
-	}
-
-	@EventHandler
 	public void villagerInteract(PlayerInteractEntityEvent event) {
 		Player player = event.getPlayer();
 		final UUID uuid = player.getUniqueId();
@@ -109,12 +101,6 @@ public class HighlightListener implements Listener {
 		if(!player.isSneaking())
 			return;
 
-		if(highlighting.containsKey(uuid)) {
-			highlighting.get(uuid).getBlockDisplay().remove();
-			Bukkit.getScheduler().cancelTask(highlighting.get(uuid).taskId);
-			highlighting.remove(player.getUniqueId());
-		}
-
 		Location jobBlock = villager.getMemory(MemoryKey.JOB_SITE);
 		if(jobBlock == null) {
 			if(villager.getProfession() == Villager.Profession.NONE || villager.getProfession() == Villager.Profession.NITWIT) {
@@ -124,6 +110,12 @@ public class HighlightListener implements Listener {
 			Config.sendActionBarMessage(player, Paths.MESSAGE_NO_STATION);
 			return;
 		}
+		if(highlighting.containsKey(uuid)) {
+			highlighting.get(uuid).getBlockDisplay().remove();
+			Bukkit.getScheduler().cancelTask(highlighting.get(uuid).taskId);
+			highlighting.remove(player.getUniqueId());
+		}
+
 		event.setCancelled(true);
 		player.closeInventory();
 

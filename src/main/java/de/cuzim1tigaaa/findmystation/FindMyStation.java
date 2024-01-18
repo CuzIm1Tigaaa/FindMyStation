@@ -1,7 +1,6 @@
 package de.cuzim1tigaaa.findmystation;
 
-import de.cuzim1tigaaa.findmystation.data.Config;
-import de.cuzim1tigaaa.findmystation.data.Data;
+import de.cuzim1tigaaa.findmystation.data.*;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -23,6 +22,8 @@ public class FindMyStation extends JavaPlugin {
 
 		Config.loadConfig(this);
 		data = new Data(this);
+
+		new Metrics(this);
 
 		new FindMyStationCommand(this);
 		new HighlightListener(this);
