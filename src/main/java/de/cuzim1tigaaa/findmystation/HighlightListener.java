@@ -1,7 +1,6 @@
 package de.cuzim1tigaaa.findmystation;
 
-import de.cuzim1tigaaa.findmystation.data.Config;
-import de.cuzim1tigaaa.findmystation.data.Data;
+import de.cuzim1tigaaa.findmystation.data.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.*;
@@ -11,6 +10,7 @@ import org.bukkit.entity.memory.MemoryKey;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -89,42 +89,56 @@ public class HighlightListener implements Listener {
 	}
 
 	@EventHandler
+	public void merchantOpen(InventoryOpenEvent event) {
+
+
+	}
+
+	@EventHandler
 	public void villagerInteract(PlayerInteractEntityEvent event) {
 		Player player = event.getPlayer();
 		final UUID uuid = player.getUniqueId();
 
 		Entity entity = event.getRightClicked();
-		if(!(entity instanceof Villager villager)) return;
+		if(!(entity instanceof Villager villager))
+			return;
 
-		if(!player.isSneaking()) return;
+		if(!player.hasPermission(Paths.PERMISSION_USE_PLUGIN))
+			return;
+
+		if(!player.isSneaking())
+			return;
 
 		if(highlighting.containsKey(uuid)) {
-			// TODO Config depends
-			return;
+			highlighting.get(uuid).getBlockDisplay().remove();
+			Bukkit.getScheduler().cancelTask(highlighting.get(uuid).taskId);
+			highlighting.remove(player.getUniqueId());
 		}
 
 		Location jobBlock = villager.getMemory(MemoryKey.JOB_SITE);
 		if(jobBlock == null) {
 			if(villager.getProfession() == Villager.Profession.NONE || villager.getProfession() == Villager.Profession.NITWIT) {
-				Config.sendActionBarMessage(player, "This villager has no job");
-				// TODO Message that villager has no job
+				Config.sendActionBarMessage(player, Paths.MESSAGE_NO_JOB);
 				return;
 			}
-			Config.sendActionBarMessage(player, "This villager has no working station!");
-			// TODO Message that villager has a job but no working station
+			Config.sendActionBarMessage(player, Paths.MESSAGE_NO_STATION);
 			return;
 		}
+		event.setCancelled(true);
 		player.closeInventory();
 
 		BlockDisplay display = spawnBlockDisplay(jobBlock.getBlock());
 		player.showEntity(plugin, display);
 
 		highlighting.put(uuid, new BlockData(jobBlock, display));
+		player.closeInventory();
 
 		Data.PlayerData playerData = plugin.getData().getData(uuid);
-		if(player.hasPermission(Config.PERMISSION_ALLOW_RGB) && playerData.isUseRGB()) {
-			highlighting.get(uuid).setTaskId(glowRGBColor(player));
-			return;
+		if(Config.getBoolean(Paths.CONFIG_RGB_ALLOW)) {
+			if(player.hasPermission(Paths.PERMISSION_ALLOW_RGB) && playerData.isUseRGB()) {
+				highlighting.get(uuid).setTaskId(glowRGBColor(player));
+				return;
+			}
 		}
 		highlighting.get(uuid).setTaskId(glowSingleColor(player));
 	}
@@ -140,14 +154,14 @@ public class HighlightListener implements Listener {
 		return Bukkit.getScheduler().runTaskLater(plugin, () -> {
 			highlighting.get(uuid).getBlockDisplay().remove();
 			highlighting.remove(uuid);
-		}, Config.getInteger(Config.CONFIG_DURATION) * 20L).getTaskId();
+		}, Config.getInteger(Paths.CONFIG_DURATION) * 20L).getTaskId();
 	}
 
 	private int glowRGBColor(Player player) {
 		final UUID uuid = player.getUniqueId();
 		Data.PlayerData playerData = plugin.getData().getData(uuid);
 		return new BukkitRunnable() {
-			long ticks = Config.getInteger(Config.CONFIG_DURATION) * 20L;
+			long ticks = Config.getInteger(Paths.CONFIG_DURATION) * 20L;
 			int index = 0;
 			@Override
 			public void run() {
@@ -158,13 +172,13 @@ public class HighlightListener implements Listener {
 					highlighting.get(uuid).getBlockDisplay().remove();
 					highlighting.remove(uuid);
 				}
-				ticks -= Config.getInteger(Config.CONFIG_RGB_SPEED);
+				ticks -= Config.getInteger(Paths.CONFIG_RGB_SPEED);
 				data.getBlockDisplay().setGlowColorOverride(rgb.get(index));
 				index++;
 				if(index == rgb.size())
 					index = 0;
 			}
-		}.runTaskTimer(plugin, 0L, Config.getInteger(Config.CONFIG_RGB_SPEED)).getTaskId();
+		}.runTaskTimer(plugin, 0L, Config.getInteger(Paths.CONFIG_RGB_SPEED)).getTaskId();
 	}
 
 
@@ -175,8 +189,9 @@ public class HighlightListener implements Listener {
 		display.setBlock(block.getBlockData());
 
 		Transformation transformation = display.getTransformation();
-		transformation.getScale().sub(.04f, .04f, .04f);
-		transformation.getTranslation().add(.02f, .02f, .02f);
+		transformation.getScale().sub(.01f, .01f, .01f);
+		transformation.getTranslation().add(.005f, .005f, .005f);
+		display.setTransformation(transformation);
 
 		display.setGlowing(true);
 		display.setVisibleByDefault(false);
