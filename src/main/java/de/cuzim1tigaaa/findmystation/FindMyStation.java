@@ -1,6 +1,5 @@
 package de.cuzim1tigaaa.findmystation;
 
-import de.cuzim1tigaaa.findmystation.command.FindMyStationCommand;
 import de.cuzim1tigaaa.findmystation.data.Config;
 import de.cuzim1tigaaa.findmystation.data.Data;
 import lombok.Getter;
