@@ -8,3 +8,35 @@ commands:
     aliases: [fms]
     description: "Plugin command"
     usage: /findmystation [subcommand]
+permissions:
+  findmystation.utils.useplugin:
+    description: "Allows a player to use the plugins features"
+    default: true
+  findmystation.utils.allowrgb:
+    description: "Allows a player to use rgb station"
+    default: false
+  findmystation.commands.color:
+    description: "Permission to use /findmystation color command"
+    default: true
+  findmystation.commands.reload:
+    description: "Permission to use /findmystation reload command"
+    default: false
+  findmystation.commands.rgb:
+    description: "Permission to use /findmystation rgb command"
+    default: false
+  findmystation.commands.*:
+    description: "Permission for all plugin commands"
+    children:
+      - findmystation.commands.color
+      - findmystation.commands.reload
+      - findmystation.commands.rgb
+  findmystation.utils.*:
+    description: "Permission for all plugin utils"
+    children:
+      - findmystation.utils.useplugin
+      - findmystation.utils.allowrgb
+  findmystation.*:
+    description: "Permission for everything"
+    children:
+      - findmystation.commands.*
+      - findmystation.utils.*
