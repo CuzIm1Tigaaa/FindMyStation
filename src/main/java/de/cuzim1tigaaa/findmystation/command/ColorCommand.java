@@ -1,13 +1,15 @@
 package de.cuzim1tigaaa.findmystation.command;
 
 import de.cuzim1tigaaa.findmystation.FindMyStation;
-import de.cuzim1tigaaa.findmystation.data.Data;
+import de.cuzim1tigaaa.findmystation.data.*;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ColorCommand implements SubCommand {
 
@@ -29,7 +31,7 @@ public class ColorCommand implements SubCommand {
 
 	@Override
 	public String getUsage() {
-		return "color [#XXXXXX|rgb]";
+		return "color [#XXXXXX]";
 	}
 
 	@Override
@@ -37,43 +39,52 @@ public class ColorCommand implements SubCommand {
 		if(!(sender instanceof Player player))
 			return;
 
+		if(!sender.hasPermission(Paths.PERMISSION_COMMAND_COLOR)) {
+			sender.sendMessage(Config.getMessage(Paths.MESSAGE_NO_PERMISSION));
+			return;
+		}
+
 		Data.PlayerData data = plugin.getData().getData(player.getUniqueId());
 
-		if(args.length == 0) {
-			// TODO Message
-			player.sendMessage(String.format("%sDeine aktuelle Farbe ist auf %s#%s %sgesetzt!",
-					ChatColor.GRAY, ChatColor.of(data.getHexColor()),
-					String.format("%08X", java.awt.Color.decode(data.getHexColor()).getRGB()).substring(2),
-					ChatColor.GRAY));
+		if(args.length < 2) {
+			player.sendMessage(Config.getMessage(Paths.MESSAGE_COMMAND_CURRENT_COLOR, "COLOR",
+					ChatColor.of(data.getHexColor()) + "#" + String.format("%08X", java.awt.Color.decode(data.getHexColor()).getRGB()).substring(2)));
 			return;
 		}
 
-		String newColor = args[0];
-		try {
-			ChatColor.of(newColor);
-			data.setUseRGB(false);
-		}catch(IllegalArgumentException ignored) {
-			if(newColor.equalsIgnoreCase("rgb")) {
-				data.setUseRGB(true);
+		String newColor = args[1];
+
+		if(newColor.startsWith("#")) {
+			try {
+				ChatColor.of(newColor);
+				data.setHexColor(newColor);
+				player.sendMessage(Config.getMessage(Paths.MESSAGE_COMMAND_NEW_COLOR, "COLOR",
+						ChatColor.of(data.getHexColor()) + "#" + String.format("%08X", java.awt.Color.decode(data.getHexColor()).getRGB()).substring(2)));
+			}catch(IllegalArgumentException ignored) {
+				player.sendMessage(Config.getMessage(Paths.MESSAGE_COMMAND_INVALID_COLOR, "COLOR", newColor));
 			}
-
-			// TODO not a valid color and not rgb
-			// TODO Message
-			player.sendMessage(ChatColor.RED + "Bitte gib einen gültigen Hexadezimalen Farbcode an! §8[§cz.B.: §f#FFFFFF§8]");
 			return;
 		}
-		data.setHexColor(newColor);
-		// TODO Message
-		player.sendMessage(String.format("%sDu hast deine Farbe auf %s#%s %sgesetzt!",
-				ChatColor.GRAY, ChatColor.of(data.getHexColor()),
-				String.format("%08X", java.awt.Color.decode(data.getHexColor()).getRGB()).substring(2),
-				ChatColor.GRAY));
+
+		if(newColor.startsWith("&") && newColor.length() == 2) {
+			Matcher matcher = cc.matcher(newColor);
+			if(!matcher.find()) {
+				player.sendMessage(Config.getMessage(Paths.MESSAGE_COMMAND_INVALID_COLOR, "COLOR", newColor));
+				return;
+			}
+			ChatColor color = ChatColor.getByChar(newColor.charAt(1));
+			data.setHexColor("#" + String.format("%08X", color.getColor().getRGB()).substring(2));
+			player.sendMessage(Config.getMessage(Paths.MESSAGE_COMMAND_NEW_COLOR, "COLOR",
+					ChatColor.of(data.getHexColor()) + "#" + String.format("%08X", java.awt.Color.decode(data.getHexColor()).getRGB()).substring(2)));
+			return;
+		}
+		player.sendMessage(Config.getMessage(Paths.MESSAGE_COMMAND_INVALID_COLOR, "COLOR", newColor));
 	}
+
+	private final Pattern cc = Pattern.compile("&[0-9a-fA-F]");
 
 	@Override
 	public List<String> tabComplete(CommandSender sender, String[] args) {
-		if(args.length == 1)
-			return List.of("rgb");
 		return Collections.emptyList();
 	}
 }

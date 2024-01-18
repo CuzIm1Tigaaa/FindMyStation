@@ -2,6 +2,7 @@ package de.cuzim1tigaaa.findmystation.command;
 
 import de.cuzim1tigaaa.findmystation.FindMyStation;
 import de.cuzim1tigaaa.findmystation.data.Config;
+import de.cuzim1tigaaa.findmystation.data.Paths;
 import org.bukkit.command.CommandSender;
 
 import java.util.Collections;
@@ -32,13 +33,13 @@ public class ReloadCommand implements SubCommand {
 
 	@Override
 	public void execute(CommandSender sender, String[] args) {
-		if(!sender.hasPermission(Config.PERMISSION_COMMAND_RELOAD)) {
-			// TODO Message
+		if(!sender.hasPermission(Paths.PERMISSION_COMMAND_RELOAD)) {
+			sender.sendMessage(Config.getMessage(Paths.MESSAGE_NO_PERMISSION));
 			return;
 		}
 		long started = System.currentTimeMillis();
 		Config.loadConfig(plugin);
-		// TODO Message duration
+		sender.sendMessage(Config.getMessage(Paths.MESSAGE_COMMAND_RELOAD, "DURATION", System.currentTimeMillis() - started));
 	}
 
 	@Override
