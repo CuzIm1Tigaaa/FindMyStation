@@ -12,6 +12,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.permissions.Permissible;
+import org.bukkit.permissions.Permission;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Transformation;
 
@@ -34,9 +36,9 @@ public class HighlightListener implements Listener {
 			Color.fromRGB(255,  0,      127)
 	);
 
+
 	@Getter
 	private static class BlockData {
-
 		final Location location;
 		private final BlockDisplay blockDisplay;
 		@Setter private int taskId;
@@ -49,11 +51,15 @@ public class HighlightListener implements Listener {
 
 
 	private final FindMyStation plugin;
-	private final Map<UUID, BlockData> highlighting = new HashMap<>();
+	private final Map<UUID, BlockData> highlighting;
+	private final Map<String, List<Color>> colors;
 
 	public HighlightListener(FindMyStation plugin) {
 		this.plugin = plugin;
 		this.plugin.getServer().getPluginManager().registerEvents(this, plugin);
+
+		this.highlighting = new HashMap<>();
+		this.colors = new HashMap<>();
 	}
 
 	@EventHandler
@@ -149,9 +155,35 @@ public class HighlightListener implements Listener {
 		}, Config.getInteger(Paths.CONFIG_DURATION) * 20L).getTaskId();
 	}
 
+
+	private int glowMultiColor(Player player, String identifier) {
+		final UUID uuid = player.getUniqueId();
+		List<Color> colorList = this.colors.get(identifier);
+		return new BukkitRunnable() {
+			long ticks = Config.getInteger(Paths.CONFIG_DURATION) * 20L;
+			int index = 0;
+			@Override
+			public void run() {
+				BlockData data = highlighting.get(uuid);
+
+				if(ticks <= 0) {
+					Bukkit.getScheduler().cancelTask(data.getTaskId());
+					highlighting.get(uuid).getBlockDisplay().remove();
+					highlighting.remove(uuid);
+				}
+				ticks -= Config.getInteger(Paths.CONFIG_RGB_SPEED);
+				data.getBlockDisplay().setGlowColorOverride(colorList.get(index));
+				index++;
+				if(index == colorList.size())
+					index = 0;
+			}
+		}.runTaskTimer(plugin, 0L, Config.getInteger(Paths.CONFIG_RGB_SPEED)).getTaskId();
+	}
+
+
 	private int glowRGBColor(Player player) {
 		final UUID uuid = player.getUniqueId();
-		Data.PlayerData playerData = plugin.getData().getData(uuid);
+
 		return new BukkitRunnable() {
 			long ticks = Config.getInteger(Paths.CONFIG_DURATION) * 20L;
 			int index = 0;
