@@ -6,7 +6,7 @@
 
     <groupId>de.cuzim1tigaaa.findmystation</groupId>
     <artifactId>FindMyStation</artifactId>
-    <version>1.2</version>
+    <version>1.3</version>
 
     <properties>
         <java.version>18</java.version>
