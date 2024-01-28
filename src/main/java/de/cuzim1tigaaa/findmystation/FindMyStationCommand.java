@@ -1,6 +1,9 @@
 package de.cuzim1tigaaa.findmystation;
 
 import de.cuzim1tigaaa.findmystation.command.*;
+import de.cuzim1tigaaa.findmystation.files.Messages;
+import de.cuzim1tigaaa.findmystation.files.Paths;
+import org.bukkit.ChatColor;
 import org.bukkit.command.*;
 
 import java.util.*;
@@ -13,22 +16,35 @@ public class FindMyStationCommand implements CommandExecutor, TabCompleter {
 	public FindMyStationCommand(FindMyStation plugin) {
 		this.subCommands = new ArrayList<>();
 		plugin.getCommand("findmystation").setExecutor(this);
-		this.subCommands.add(new ColorCommand(plugin));
-		this.subCommands.add(new ReloadCommand(plugin));
-		this.subCommands.add(new RGBCommand(plugin));
+
+		this.subCommands.add(new SubAnimation(plugin));
+		this.subCommands.add(new SubColor(plugin));
+		this.subCommands.add(new SubReload(plugin));
 	}
 
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String s, String[] args) {
 		if(args.length == 0) {
-
+			subCommands.forEach(sub -> sender.sendMessage(ChatColor.GRAY + " » " + ChatColor.RED + "/findmystation " + sub.getUsage()));
 			return true;
 		}
 
-		subCommands.stream().filter(sc -> args[0].equalsIgnoreCase(sc.getCommand()) ||
-						(sc.getAliases() != null && !sc.getAliases().isEmpty() && sc.getAliases().contains(args[0].toLowerCase())))
-				.findFirst().ifPresent(sc -> sc.execute(sender, args));
+		SubCommand selected = subCommands.stream()
+				.filter(sub -> args[0].equalsIgnoreCase(sub.getCommand()) ||
+						(!sub.getAliases().isEmpty() && sub.getAliases().contains(args[0].toLowerCase())))
+				.findFirst().orElse(null);
+
+		if(selected == null) {
+			subCommands.forEach(sub -> sender.sendMessage(ChatColor.GRAY + " » " + ChatColor.RED + "/findmystation " + sub.getUsage()));
+			return true;
+		}
+		if(!sender.hasPermission(selected.getPermission())) {
+			sender.sendMessage(Messages.getMessage(Paths.MESSAGE_NO_PERMISSION));
+			return true;
+		}
+
+		selected.execute(sender, args);
 		return true;
 	}
 
@@ -38,13 +54,15 @@ public class FindMyStationCommand implements CommandExecutor, TabCompleter {
 			return Collections.emptyList();
 
 		if(args.length == 1)
-			return subCommands.stream().map(SubCommand::getCommand).collect(Collectors.toList());
+			return subCommands.stream().filter(sub -> sender.hasPermission(sub.getPermission())).map(SubCommand::getCommand).collect(Collectors.toList());
 
-		SubCommand command =  subCommands.stream().filter(sc -> args[0].equalsIgnoreCase(sc.getCommand()) ||
-						(sc.getAliases() != null && !sc.getAliases().isEmpty() && sc.getAliases().contains(args[0].toLowerCase())))
+		SubCommand selected = subCommands.stream()
+				.filter(sub -> args[0].equalsIgnoreCase(sub.getCommand()) ||
+						(!sub.getAliases().isEmpty() && sub.getAliases().contains(args[0].toLowerCase())))
 				.findFirst().orElse(null);
-		if(command == null)
+
+		if(selected == null)
 			return Collections.emptyList();
-		return command.tabComplete(sender, args);
+		return selected.tabComplete(sender, args);
 	}
 }

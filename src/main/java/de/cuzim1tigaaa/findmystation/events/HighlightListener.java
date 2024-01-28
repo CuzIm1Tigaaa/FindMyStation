@@ -1,8 +1,8 @@
-package de.cuzim1tigaaa.findmystation;
+package de.cuzim1tigaaa.findmystation.events;
 
+import de.cuzim1tigaaa.findmystation.FindMyStation;
 import de.cuzim1tigaaa.findmystation.data.*;
-import lombok.Getter;
-import lombok.Setter;
+import de.cuzim1tigaaa.findmystation.files.*;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
@@ -19,41 +19,14 @@ import java.util.*;
 
 public class HighlightListener implements Listener {
 
-	private final List<Color> rgb = List.of(
-			Color.fromRGB(255,  0,      0),
-			Color.fromRGB(255,  127,    0),
-			Color.fromRGB(255,  255,    0),
-			Color.fromRGB(127,  255,    0),
-			Color.fromRGB(0,    255,    0),
-			Color.fromRGB(0,    255,    127),
-			Color.fromRGB(0,    255,    255),
-			Color.fromRGB(0,    127,    255),
-			Color.fromRGB(0,    0,      255),
-			Color.fromRGB(127,  0,      255),
-			Color.fromRGB(255,  0,      255),
-			Color.fromRGB(255,  0,      127)
-	);
-
-	@Getter
-	private static class BlockData {
-
-		final Location location;
-		private final BlockDisplay blockDisplay;
-		@Setter private int taskId;
-
-		public BlockData(org.bukkit.Location location, BlockDisplay blockDisplay) {
-			this.location = location;
-			this.blockDisplay = blockDisplay;
-		}
-	}
-
-
 	private final FindMyStation plugin;
-	private final Map<UUID, BlockData> highlighting = new HashMap<>();
+	private final Map<UUID, BlockData> highlighting;
 
 	public HighlightListener(FindMyStation plugin) {
 		this.plugin = plugin;
 		this.plugin.getServer().getPluginManager().registerEvents(this, plugin);
+
+		this.highlighting = new HashMap<>();
 	}
 
 	@EventHandler
@@ -66,7 +39,7 @@ public class HighlightListener implements Listener {
 
 		BlockData data = highlighting.get(uuid);
 		data.getBlockDisplay().remove();
-		Bukkit.getScheduler().cancelTask(data.taskId);
+		Bukkit.getScheduler().cancelTask(data.getTaskId());
 		highlighting.remove(player.getUniqueId());
 	}
 
@@ -81,7 +54,7 @@ public class HighlightListener implements Listener {
 		BlockData data = highlighting.get(uuid);
 		if(data.location.equals(event.getBlock().getLocation())) {
 			data.getBlockDisplay().remove();
-			Bukkit.getScheduler().cancelTask(data.taskId);
+			Bukkit.getScheduler().cancelTask(data.getTaskId());
 			highlighting.remove(player.getUniqueId());
 		}
 	}
@@ -95,7 +68,7 @@ public class HighlightListener implements Listener {
 		if(!(entity instanceof Villager villager))
 			return;
 
-		if(!player.hasPermission(Paths.PERMISSION_USE_PLUGIN))
+		if(!player.hasPermission(Paths.PERM_USE_PLUGIN))
 			return;
 
 		if(!player.isSneaking())
@@ -112,7 +85,7 @@ public class HighlightListener implements Listener {
 		}
 		if(highlighting.containsKey(uuid)) {
 			highlighting.get(uuid).getBlockDisplay().remove();
-			Bukkit.getScheduler().cancelTask(highlighting.get(uuid).taskId);
+			Bukkit.getScheduler().cancelTask(highlighting.get(uuid).getTaskId());
 			highlighting.remove(player.getUniqueId());
 		}
 
@@ -126,9 +99,18 @@ public class HighlightListener implements Listener {
 		player.closeInventory();
 
 		Data.PlayerData playerData = plugin.getData().getData(uuid);
-		if(Config.getBoolean(Paths.CONFIG_RGB_ALLOW)) {
-			if(player.hasPermission(Paths.PERMISSION_ALLOW_RGB) && playerData.isUseRGB()) {
-				highlighting.get(uuid).setTaskId(glowRGBColor(player));
+		if(Config.getBoolean(Paths.CONFIG_ALLOW_ANIMATIONS) && playerData.isUseAnimation()) {
+			Animation animation;
+			if((animation = plugin.getCustomColors().getAnimations().get(playerData.getAnimation())) == null) {
+				highlighting.get(uuid).setTaskId(glowSingleColor(player));
+				return;
+			}
+			if(!animation.isRequirePermission()) {
+				highlighting.get(uuid).setTaskId(glowMultiColor(player, playerData.getAnimation()));
+				return;
+			}
+			if(player.hasPermission(Paths.PERM_ALLOW_ANIMATIONS) && player.hasPermission(Paths.PERM_SPECIFIC_ANIMATION + animation.getName())) {
+				highlighting.get(uuid).setTaskId(glowMultiColor(player, playerData.getAnimation()));
 				return;
 			}
 		}
@@ -149,9 +131,10 @@ public class HighlightListener implements Listener {
 		}, Config.getInteger(Paths.CONFIG_DURATION) * 20L).getTaskId();
 	}
 
-	private int glowRGBColor(Player player) {
+
+	private int glowMultiColor(Player player, String identifier) {
 		final UUID uuid = player.getUniqueId();
-		Data.PlayerData playerData = plugin.getData().getData(uuid);
+		Animation animation = plugin.getCustomColors().getAnimations().get(identifier);
 		return new BukkitRunnable() {
 			long ticks = Config.getInteger(Paths.CONFIG_DURATION) * 20L;
 			int index = 0;
@@ -164,16 +147,14 @@ public class HighlightListener implements Listener {
 					highlighting.get(uuid).getBlockDisplay().remove();
 					highlighting.remove(uuid);
 				}
-				ticks -= Config.getInteger(Paths.CONFIG_RGB_SPEED);
-				data.getBlockDisplay().setGlowColorOverride(rgb.get(index));
+				ticks -= animation.getInterval();
+				data.getBlockDisplay().setGlowColorOverride(animation.getColors().get(index));
 				index++;
-				if(index == rgb.size())
+				if(index == animation.getColors().size())
 					index = 0;
 			}
-		}.runTaskTimer(plugin, 0L, Config.getInteger(Paths.CONFIG_RGB_SPEED)).getTaskId();
+		}.runTaskTimer(plugin, 0L, animation.getInterval()).getTaskId();
 	}
-
-
 
 
 	private BlockDisplay spawnBlockDisplay(Block block) {

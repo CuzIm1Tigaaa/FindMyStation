@@ -1,6 +1,8 @@
 package de.cuzim1tigaaa.findmystation;
 
 import de.cuzim1tigaaa.findmystation.data.*;
+import de.cuzim1tigaaa.findmystation.events.HighlightListener;
+import de.cuzim1tigaaa.findmystation.files.*;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -9,6 +11,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class FindMyStation extends JavaPlugin {
 
 	private Data data;
+	private CustomColors customColors;
 
 	@Override
 	public void onEnable() {
@@ -20,13 +23,25 @@ public class FindMyStation extends JavaPlugin {
 			getLogger().info("Server version is valid!");
 		}
 
-		Config.loadConfig(this);
-		data = new Data(this);
+		reload();
 
 		new Metrics(this);
 
 		new FindMyStationCommand(this);
 		new HighlightListener(this);
+	}
+
+	public void reload() {
+		Config.loadConfig(this);
+		Messages.loadLanguageFile(this);
+		if(data != null)
+			data.saveJson();
+
+		data = new Data(this);
+		if(customColors == null)
+			customColors = new CustomColors(this);
+		else
+			customColors.loadColors();
 	}
 
 	private boolean checkVersion() {

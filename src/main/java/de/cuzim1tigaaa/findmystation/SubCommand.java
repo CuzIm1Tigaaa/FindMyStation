@@ -1,5 +1,6 @@
-package de.cuzim1tigaaa.findmystation.command;
+package de.cuzim1tigaaa.findmystation;
 
+import lombok.NonNull;
 import org.bukkit.command.CommandSender;
 
 import java.util.List;
@@ -7,6 +8,9 @@ import java.util.List;
 public interface SubCommand {
 
 	String getCommand();
+	String getPermission();
+
+	@NonNull
 	List<String> getAliases();
 	String getUsage();
 

@@ -1,0 +1,21 @@
+Messages:
+  Interact:
+    NoJob: '&cThis villager has no job'
+    NoStation: '&cThis villager has no working station'
+  Commands:
+    NoPermission: '&cYou do not have permission to do that!'
+    Color:
+      CurrentColor: '&7Working stations are currently highlighted in %COLOR%'
+      InvalidColor: '&e%COLOR% &cis not a valid color!'
+      NewColor: '&7Working stations will now be highlighted in %COLOR%'
+    Animation:
+      CurrentAnimation: '&7Working stations are currently highlighted with animation &b%ANIMATION%'
+      AnimationsNotActive: '&cAnimations are currently deactivated by you! &7» &c/fms animation enable'
+      InvalidAnimation: '&e%ANIMATION% &cis not a valid animation!'
+      NewAnimation: '&7Working stations will now be highlighted with animation &b%ANIMATION%'
+      NoAnimations: '&cThere is no animation that you can select!'
+      AnimationList: '&7List of available Animations:'
+      ClickList: '&7Click here to select this animation'
+      EnableAnimations: '&7Working stations are &anow &7highlighted with an animation!'
+      DisableAnimations: '&7Working stations are &cno longer &7highlighted with an animation!'
+    Reload: '&7The plugins configurations have been reloaded &8[&b%DURATION%ms&8]'
