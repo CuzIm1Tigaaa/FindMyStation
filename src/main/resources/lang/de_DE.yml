@@ -1,0 +1,21 @@
+Messages:
+  Interact:
+    NoJob: '&cDieser Villager hat keinen Beruf'
+    NoStation: '&cDieser Villager hat keine Werkbank'
+  Commands:
+    NoPermission: '&cFür diesen Befehl hast du keine Rechte!'
+    Color:
+      CurrentColor: '&7Werkbänke werden aktuell in der Farbe %COLOR% &7hervorgehoben'
+      InvalidColor: '&e%COLOR% &cist keine gültige Farbe!'
+      NewColor: '&7Werkbänke werden nun in der Farbe %COLOR% &7hervorgehoben'
+    Animation:
+      CurrentAnimation: '&7Villager-Werkbänke werden aktuell durch die Animation &b%ANIMATION% &7hervorgehoben!'
+      AnimationsNotActive: '&cDu hast aktuell Animationen deaktiviert! &7» &c/fms animation enable'
+      InvalidAnimation: '&e%ANIMATION% &cist kein gültiger Animationsname'
+      NewAnimation: '&7Villager-Werkbänke werden ab jetzt durch die Animation &b%ANIMATION% &7hervorgehoben!'
+      NoAnimations: '&cFür dich ist keine Animation verfügbar!'
+      AnimationList: '&7Liste der verfügbaren Animationen:'
+      ClickList: '&7Klicke hier, um diese Animation auszuwählen'
+      EnableAnimations: '&7Villager-Werkbänke werden &aab jetzt &7durch eine Animation hervorgehoben!'
+      DisableAnimations: '&7Villager-Werkbänke werden &cnicht mehr &7durch eine Animation hervorgehoben!'
+    Reload: '&7Die Dateien des Plugins wurden neu geladen! &8[&b%DURATION%ms&8]'
