@@ -2,6 +2,8 @@ package de.cuzim1tigaaa.findmystation.data;
 
 import com.google.gson.Gson;
 import de.cuzim1tigaaa.findmystation.FindMyStation;
+import de.cuzim1tigaaa.findmystation.files.Config;
+import de.cuzim1tigaaa.findmystation.files.Paths;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,18 +21,19 @@ public class Data {
 	@Getter
 	public static class PlayerData {
 		private final UUID uuid;
-		@Setter private boolean useRGB;
-		@Setter private String hexColor;
+		@Setter private boolean useAnimation;
+		@Setter private String animation, hexColor;
 
 		public PlayerData(UUID uuid) {
 			this.uuid = uuid;
-			this.useRGB = Config.getBoolean(Paths.CONFIG_RGB_ALLOW);
+			this.useAnimation = Config.getBoolean(Paths.CONFIG_ALLOW_ANIMATIONS);
+			this.animation = Config.getString(Paths.CONFIG_DURATION);
 			this.hexColor = Config.getString(Paths.CONFIG_DEFAULT_COLOR);
 		}
 
-		public PlayerData(UUID uuid, boolean useRGB, String hexColor) {
+		public PlayerData(UUID uuid, boolean useAnimation, String hexColor) {
 			this.uuid = uuid;
-			this.useRGB = useRGB;
+			this.useAnimation = useAnimation;
 			this.hexColor = hexColor;
 		}
 	}
