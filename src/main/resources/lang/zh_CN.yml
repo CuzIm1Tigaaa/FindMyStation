@@ -1,0 +1,21 @@
+Messages:
+  Interact:
+    NoJob: '&c这个村民没有工作'
+    NoStation: '&c这个村民没有工作站'
+  Commands:
+    NoPermission: '&c您没有执行此操作的权限！'
+    Color:
+      CurrentColor: '&7工作站当前以 %COLOR% 颜色高亮显示'
+      InvalidColor: '&e%COLOR% &c不是有效的颜色！'
+      NewColor: '&7工作站现在将以 %COLOR% 颜色高亮显示'
+    Animation:
+      CurrentAnimation: '&7工作站当前以动画 &b%ANIMATION% 高亮显示'
+      AnimationsNotActive: '&c您当前已禁用动画！ &7» &c/fms animation enable'
+      InvalidAnimation: '&e%ANIMATION% &c不是有效的动画！'
+      NewAnimation: '&7工作站现在将以动画 &b%ANIMATION% 高亮显示'
+      NoAnimations: '&c没有可供选择的动画！'
+      AnimationList: '&7可用动画列表：'
+      ClickList: '&7点击此处选择此动画'
+      EnableAnimations: '&7工作站现在以动画方式高亮显示！'
+      DisableAnimations: '&7工作站不再以动画方式高亮显示！'
+    Reload: '&7插件配置已重新加载 &8[&b%DURATION%毫秒&8]'
